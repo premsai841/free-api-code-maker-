@@ -1,136 +1,158 @@
-# APIForge — Free API Code Maker
+# APIFREE AI Hub
 
-APIForge is a free, browser-based tool for building HTTP requests and generating ready-to-use code snippets. Configure a request once, then generate it as **cURL**, **Python (requests)**, or **JavaScript (fetch)**. No account or installation is required for the core tool.
+**APIFREE AI Hub** is a free-first, hybrid AI workspace. It combines experimental browser-local inference, optional connections to cloud AI providers, automatic provider fallback, an API playground, and conversation report export in one responsive website.
 
-The project is a lightweight static website built with HTML, CSS, and vanilla JavaScript.
+The project is designed to make AI more accessible without pretending that paid cloud inference can be made unlimited or that providers' quotas can be bypassed.
 
-## Features
+## What works in this version
 
-- Generate cURL, Python, and JavaScript request snippets.
-- Support for GET, POST, PUT, PATCH, and DELETE methods.
-- Add an optional Authorization value.
-- Configure request headers and query parameters using JSON.
-- Add a JSON request body for methods that support one.
-- Copy the generated snippet.
-- Load a sample POST request or reset the form.
-- Optional AI helper for explaining or modifying generated requests using an OpenAI-compatible chat-completions endpoint and your own API key.
-- Responsive layout for desktop and mobile.
+- **Unified chat UI** with conversation history retained in the current browser tab.
+- **Cloud provider adapters** for Google Gemini, Groq, and OpenRouter using keys supplied by the user.
+- **Automatic fallback** across connected providers for rate-limit, quota, temporary server, overload, and network failures.
+- **Browser-local model (experimental)** powered by Transformers.js and a small Qwen model. The model downloads to the visitor's device and uses browser-supported compute; first load can be large and may require WebGPU or substantial RAM.
+- **Ollama local adapter** for users who run Ollama on their own computer.
+- **API Playground** for sending browser-based HTTP requests and generating cURL.
+- **Report export** to Markdown, created locally in the browser.
+- Responsive premium dark interface. No user account or application backend is required for this static prototype.
 
-## Use the website
+## Important: what "free" means
 
-Open the deployed website:
+APIFREE AI Hub does **not** generate API keys, provide shared cloud credits, bypass quotas, or unlock paid models for free.
 
-**https://premsai841.github.io/free-api-code-maker-/**
+There are three access paths:
 
-If GitHub Pages has not been enabled yet, follow the setup steps below.
+1. **Browser-local model:** no API key or cloud inference bill, but it uses the visitor's device and downloads model files. Speed and quality depend on the device and browser.
+2. **Ollama local:** no per-request API bill, but the visitor must install Ollama, download a model, and have suitable hardware.
+3. **Cloud free tiers:** users connect their own provider keys. Providers set their own free quotas, model access, billing rules, data policies, and terms. Free tiers can change or disappear.
+
+If all connected providers are unavailable and no local model is ready, chat cannot produce an answer. The app must not claim otherwise.
 
 ## Run locally
 
-The core application is a static page. You do not need Node.js, a package manager, or a build step.
+This first version is a static HTML application; no build step is needed.
 
 1. Clone the repository:
 
    ```bash
    git clone https://github.com/premsai841/free-api-code-maker-.git
-   ```
-
-2. Open the project folder:
-
-   ```bash
    cd free-api-code-maker-
    ```
 
-3. Open `index.html` in a modern browser.
+2. Serve the folder from a local web server (recommended for module imports and browser security):
 
-You can also serve the folder with a local static server if you prefer. There are no build commands or dependencies to install for the core generator.
+   ```bash
+   python -m http.server 8000
+   ```
+
+3. Open `http://localhost:8000`.
+
+You can also open `index.html` directly, but some browser features and model loading may behave differently under a `file://` URL.
 
 ## Deploy with GitHub Pages
 
-1. Open the repository's **Settings** tab.
-2. Select **Pages** from the sidebar.
-3. Under **Build and deployment**, choose **Deploy from a branch**.
-4. Select branch **main** and folder **/(root)**.
-5. Click **Save**.
-6. Wait for GitHub Pages to publish the site. The URL should be:
+1. Open **Settings → Pages** in the repository.
+2. Under **Build and deployment**, select **Deploy from a branch**.
+3. Select branch `main` and folder `/(root)`.
+4. Save and wait for the GitHub Pages workflow to publish.
 
+Expected project URL (deployment must be enabled separately):
+
+`https://premsai841.github.io/free-api-code-maker-/`
+
+The application is static, so the chat UI and browser-local model can be hosted on GitHub Pages. Provider APIs may reject browser requests because of CORS or provider-specific restrictions. A static host cannot keep a shared server-side API key secret.
+
+## Use the AI chat
+
+1. Open **AI Chat**.
+2. For cloud access, open **Connections & settings** and add keys obtained from the providers' official dashboards.
+3. Alternatively, load **Browser Local AI** or configure Ollama.
+4. Choose **Auto · best available** and leave **Auto fallback** enabled.
+5. Send a message. The router tries connected providers in the configured order.
+
+### Current cloud adapters
+
+| Provider | Default model / route | API style |
+|---|---|---|
+| Google Gemini | `gemini-2.5-flash` | Gemini generateContent |
+| Groq | `openai/gpt-oss-20b` | OpenAI-compatible chat completions |
+| OpenRouter | `openrouter/free` | OpenAI-compatible chat completions |
+
+Model IDs, availability, and free-tier status can change. Update the defaults in `index.html` when providers retire or rename models. The OpenRouter free route selects from models currently available under its free routing rules; it does not guarantee a particular model.
+
+### Fallback behavior
+
+- The app keeps the conversation messages in browser memory for the current tab.
+- When a provider returns a recognized quota/rate-limit, temporary server, overload, or network error, Auto mode attempts the next configured and connected engine.
+- Invalid credentials and malformed requests are not blindly retried across every provider.
+- The next provider receives the available conversation history, but different models can produce different answers and may have different context limits or tool capabilities.
+- This version does not guarantee exact answer equivalence, streaming parity, or seamless continuation for every provider.
+
+## Browser Local AI (experimental)
+
+The app loads Transformers.js from jsDelivr and downloads `onnx-community/Qwen2.5-0.5B-Instruct` from the Hugging Face model hub when the user selects **Load local model**.
+
+- First load requires an internet connection and can download hundreds of megabytes.
+- Inference then runs in the browser using available local execution backends.
+- Performance varies by browser, device memory, CPU/GPU and WebGPU support.
+- Closing the tab or clearing browser data may require model files to be downloaded again.
+- This is a small model intended to demonstrate local inference, not to match the quality of large hosted models.
+
+## Ollama local setup
+
+1. Install Ollama from [ollama.com](https://ollama.com/).
+2. Pull a model, for example:
+
+   ```bash
+   ollama pull qwen2.5:3b
    ```
-   https://premsai841.github.io/free-api-code-maker-/
-   ```
 
-After future commits to the selected branch, GitHub Pages will publish the updated static files.
+3. Start Ollama and configure it to accept browser-origin requests from the site using its supported `OLLAMA_ORIGINS` setting.
+4. Keep Ollama running on the same computer as the browser.
+5. In APIFREE AI Hub settings, enable Ollama and enter the local model name.
 
-## How to use
+The default endpoint is `http://localhost:11434`. Browser mixed-content, private-network, and CORS restrictions can prevent the website from reaching a local service, depending on browser and deployment origin. Do not expose your Ollama port publicly without appropriate security controls.
 
-1. Enter the full request URL, including `https://`.
-2. Choose the HTTP method.
-3. Add an Authorization value if the API requires one. For example: `Bearer YOUR_TOKEN`.
-4. Add headers as a JSON object.
-5. Add query parameters as a JSON object.
-6. For POST, PUT, or PATCH requests, enter a valid JSON body when needed.
-7. Select **Generate code**.
-8. Switch between cURL, Python, and JavaScript tabs, then select **Copy snippet**.
+## API Playground
 
-### Example request
+The playground sends requests directly from the browser. It can display response status and body and generate cURL. Many APIs do not allow browser-origin requests; a CORS failure does not necessarily mean the API is down. Use the generated cURL in a terminal or a properly secured backend when browser access is blocked.
 
-This example sends a JSON payload to JSONPlaceholder:
+## Security and privacy
 
-- **Method:** `POST`
-- **URL:** `https://jsonplaceholder.typicode.com/posts`
-- **Headers:**
+- Provider keys are stored in the browser's `localStorage` on that device. They are not sent to an APIFREE AI Hub backend because this project has no backend.
+- Browser storage is **not a secure vault**. Anyone with access to the browser profile or a script running on the same origin may be able to access saved keys. Avoid shared/public computers and use restricted keys.
+- Provider requests send prompts and conversation history to the selected provider. Review that provider's data handling and retention policy before sending sensitive information.
+- Browser-local model inference is intended to run on the visitor's device after model download; model files are fetched from the configured model host.
+- Never commit API keys to GitHub, put them in source code, or publish a shared key in a static website.
+- A public service with centrally managed API keys requires a backend, abuse controls, budget limits, secret management, monitoring, and an ongoing funding source.
 
-  ```json
-  {
-    "Accept": "application/json"
-  }
-  ```
+## Architecture
 
-- **Query parameters:** `{}`
-- **Body:**
+This prototype uses a single static `index.html` file:
 
-  ```json
-  {
-    "title": "Hello API",
-    "body": "Generated with APIForge",
-    "userId": 1
-  }
-  ```
+- UI layer: navigation, chat, provider settings, API playground and report export.
+- Provider layer: Gemini, OpenAI-compatible (Groq/OpenRouter), Ollama, and browser-local adapters.
+- Router: provider order, availability checks, error classification and fallback.
+- State: conversation history in memory; optional provider settings in localStorage.
+- Deployment: static hosting such as GitHub Pages.
 
-The generated snippets will make the equivalent request in each supported language. JSONPlaceholder is a demo API; it is useful for trying the example, not for storing production data.
+A production-grade multi-user platform should split these modules into a maintainable frontend and add a secure backend only if centrally managed provider credentials, authentication, shared quotas, or server-side storage are required.
 
-## Optional AI helper
+## Known limitations
 
-The AI helper can send your request details and a prompt to an OpenAI-compatible chat-completions endpoint.
-
-1. Enter the endpoint URL.
-2. Enter the model name supported by your provider.
-3. Enter your own API key.
-4. Describe what you want help with.
-5. Select **Ask AI**.
-
-**Security warning:** The AI request is sent directly from your browser to the endpoint you specify. This project does not provide a server-side proxy or secret vault. Use your own restricted key, understand your provider's billing and data policies, and do not enter a valuable or shared production secret into a public browser-based tool. The AI feature may also fail if the provider does not allow browser requests from this site's origin (CORS).
-
-## Limitations
-
-- This tool generates code; it does not execute the generated cURL, Python, or JavaScript request for you.
-- The core generator accepts headers, query parameters, and request bodies as JSON. Invalid JSON must be corrected before code can be generated.
-- The request body is omitted for GET and DELETE methods.
-- Generated code is a starting point. Review it and add application-specific error handling, timeouts, retries, authentication handling, and secure secret management before production use.
-- Python output uses the third-party `requests` package. Install it in your Python environment with `python -m pip install requests`.
-- JavaScript output uses the browser-compatible `fetch` API. The target API may enforce CORS or other browser security restrictions.
-- The AI helper requires a compatible provider, a valid key, network access, and provider support for browser-origin requests. Provider usage may incur charges.
-- This is a static front-end project. It has no user accounts, backend, database, or server-side key protection.
-
-## Tech stack
-
-- HTML
-- CSS
-- Vanilla JavaScript
-- Browser APIs: `fetch`, `URL`, and Clipboard API
+- This is an initial prototype, not a production-scale hosted AI service.
+- No shared cloud API keys, central credits, user accounts, server database, or unlimited inference are included.
+- Browser-local inference is experimental and device-dependent.
+- Cloud providers may block direct browser calls or change models, quotas, pricing, and API behavior.
+- Fallback only handles recognized failures; provider-specific error formats may need updates.
+- Conversation history is held in the current tab and is not synchronized across devices.
+- Reports export to Markdown; PDF generation and persistent report library are not included yet.
+- API Playground requests may be blocked by CORS.
+- Do not use this prototype as a secure store for valuable API credentials.
 
 ## Contributing
 
-Bug reports and improvements are welcome. For a change, fork the repository, create a branch, make your update, and open a pull request with a clear description of what changed and how you tested it.
+Issues and pull requests are welcome. Please include the browser, provider, model ID, error response (with secrets removed), and steps to reproduce. Never post API keys or private prompts in an issue.
 
 ## License
 
-No license file is currently included. Unless a license is added to this repository, the code is not explicitly released under an open-source license. Check with the repository owner before reusing or redistributing it.
+No license file is currently included. Until a license is added, the repository is not explicitly released under an open-source license. Ask the repository owner before reuse or redistribution.
