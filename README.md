@@ -23,7 +23,7 @@ There are three access paths:
 
 1. **Browser-local model:** no API key or cloud inference bill, but it uses the visitor's device and downloads model files. Speed and quality depend on the device and browser.
 2. **Ollama local:** no per-request API bill, but the visitor must install Ollama, download a model, and have suitable hardware.
-3. **Cloud free tiers:** users connect their own provider keys. Providers set their own free quotas, model access, billing rules, data policies, and terms. Free tiers can change or disappear.
+3. **Cloud free tiers:** users connect their own provider keys. Providers set their own free quotas, model access, billing rules, data policies, and terms. Free tiers can change or disappear. For example, OpenRouter currently documents 20 requests per minute and 50 requests per day for its free variants; Groq rate limits are organization-level and depend on the model and account. Check current provider dashboards before relying on a quota.
 
 If all connected providers are unavailable and no local model is ready, chat cannot produce an answer. The app must not claim otherwise.
 
@@ -73,7 +73,7 @@ The application is static, so the chat UI and browser-local model can be hosted 
 
 | Provider | Default model / route | API style |
 |---|---|---|
-| Google Gemini | `gemini-2.5-flash` | Gemini generateContent |
+| Google Gemini | `gemini-3.8-flash` | Gemini generateContent |
 | Groq | `openai/gpt-oss-20b` | OpenAI-compatible chat completions |
 | OpenRouter | `openrouter/free` | OpenAI-compatible chat completions |
 
